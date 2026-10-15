@@ -109,7 +109,21 @@ function ls(k,v){try{if(v===undefined){var x=localStorage.getItem(k);return x?JS
 S.favs=ls("sr_favs")||[];S.hist=ls("sr_hist")||[];S.cat=ls("sr_cat")||"すべて";S.seen=ls("sr_seen")||[];
 function pool(){return T.filter(function(x){return S.cat==="すべて"||x[0]===S.cat})}
 function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
-function refill(){var seen=S.seen;var left=pool().filter(function(x){return seen.indexOf(x[1])<0});if(!left.length){S.seen=[];ls("sr_seen",S.seen);left=pool()}S.bag=shuffle(left)}
+var W1=["子どもの頃","中学・高校のとき","20代のころ","10年前","去年","先月","先週","昨日","今朝","いま"];
+var W2=["食べ物","音","におい","場所","道具","人づきあい","買い物","移動","天気","お金","睡眠","仕事","遊び","部屋","言葉","失敗","約束","習慣","服","乗り物","お店","本や動画","連絡","贈り物","時間の使い方"];
+var W3=["いちばん印象に残っている","今も覚えている","いま思うと笑える","ちょっと恥ずかしかった","誰にも言わなかった","好きだった","苦手だった","変わったと感じる","なくなって寂しい","もう一度やってみたい","人に話したことがない","いちばん長く続いている"];
+var W4=["海と山","朝型と夜型","一人旅と団体旅行","新しいものと使い慣れたもの","安くて多いと高くて少ない","知らせる派と黙っておく派","計画する派と思いつきの派","電話と文章","家で過ごす休日と出かける休日","形に残るものと思い出に残るもの"];
+function rp(a){return a[Math.floor(Math.random()*a.length)]}
+function gen(){
+  var k=Math.floor(Math.random()*5),t;
+  if(k<2)t=rp(W1)+"の"+rp(W2)+"で、"+rp(W3)+"こと";
+  else if(k==2)t="もし"+rp(W2)+"を1つだけ変えられるなら、何を変える?";
+  else if(k==3)t=rp(W4)+"、どちらかを一生選ぶなら?その理由は?";
+  else t="いまの"+rp(W2)+"について、良いところを3つ、気になるところを1つ挙げるなら?";
+  return["自動お題",t]}
+function refill(){var seen=S.seen;var left=pool().filter(function(x){return seen.indexOf(x[1])<0});
+  if(!left.length){var b=[],u={};while(b.length<30){var g=gen();if(!u[g[1]]&&seen.indexOf(g[1])<0){u[g[1]]=1;b.push(g)}}left=b}
+  S.bag=shuffle(left)}
 function pick2(){var a=shuffle(DIG);return a.slice(0,2)}
 function next(){
   if(!S.bag.length)refill();var x=S.bag.pop();S.cur=x;S.seen.push(x[1]);ls("sr_seen",S.seen.slice(-400));
@@ -123,7 +137,7 @@ function show(){
 }
 function lists(){
   var left=pool().filter(function(x){return S.seen.indexOf(x[1])<0}).length;
-  $("count").textContent=(S.cat==="すべて"?"全":S.cat+" ")+pool().length+"個 / 残り"+left;
+  $("count").textContent="∞ お題は無限に出ます";
   fill($("favs"),S.favs,"まだありません");fill($("hist"),S.hist.slice(1),"まだありません");
 }
 function fill(ul,arr,empty){ul.textContent="";if(!arr.length){var li=document.createElement("li");li.textContent=empty;ul.appendChild(li);return}
